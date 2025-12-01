@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"; // React state management
 import { useParams } from "next/navigation"; // Get dynamic route params
 
 // redux imports 
-import { editModule, updateModule, deleteModule, setModules } from "./reducer";
+import { editModule, updateModule, setModules } from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../../store";
 
@@ -46,7 +46,7 @@ export default function Modules() {
 
   // Remove module
    const onRemoveModule = async (courseId: string, moduleId: string) => {
-    await client.deleteModule(cid, moduleId);
+    await client.deleteModule(cid as string, moduleId);
     dispatch(
       setModules(
         modules.filter((m: any) => m._id !== moduleId)
@@ -99,7 +99,7 @@ export default function Modules() {
               {/* Buttons for module-level actions */}
               <ModuleControlButtons 
               moduleId={module._id}
-              deleteModule={(moduleId) => onRemoveModule(moduleId)}
+              deleteModule={(moduleId) => onRemoveModule(cid as string, moduleId)}
               editModule={(moduleId) => dispatch(editModule(moduleId))}
               saveModule={() => onUpdateModule({ ...module, editing: false })}
               isEditing={module.editing || false} 
