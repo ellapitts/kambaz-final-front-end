@@ -6,9 +6,12 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store";
 
 export default function AccountNavigation() {
+  
+  // Type assertion: Explicitly tell TypeScript that currentUser is either
+  // an object with _id, role, and username properties, or null when logged out
   const { currentUser } = useSelector(
     (state: RootState) => state.accountReducer
-  );
+  ) as { currentUser: { _id: string; role: string; username: string } | null };
 
   const links = currentUser ? ["Profile"] : ["Signin", "Signup"];
   const pathname = usePathname();
@@ -26,9 +29,15 @@ export default function AccountNavigation() {
         </NavItem>
       ))}
       {currentUser && currentUser.role === "ADMIN" && (
-       <NavLink as={Link} href={`/Account/Users`} 
-         active={pathname.endsWith('Users')}> Users </NavLink> )}
-
+        <NavLink
+          as={Link}
+          href={`/Account/Users`}
+          active={pathname.endsWith("Users")}
+        >
+          {" "}
+          Users{" "}
+        </NavLink>
+      )}
     </Nav>
   );
 }
