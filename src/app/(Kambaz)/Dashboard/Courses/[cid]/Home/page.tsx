@@ -4,6 +4,7 @@
 // Combines the Course Status with the Modules to create the Home screen for the course screen.
 import Modules from "@/app/(Kambaz)/Courses/[cid]/Modules/page";
 import CourseStatus from "@/app/(Kambaz)/Courses/[cid]/Home/coursehomepagestatus";
+import React from 'react';
 
 export default function Home() {
   return (
