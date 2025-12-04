@@ -4,4 +4,6 @@ import assignments from "./assignments.json" assert { type: "json" }; // for Tur
 import users from "./users.json"; // import users data from JSON file ( user info for course)
 import enrollments from "./enrollments.json"; // import enrollments data from JSON file ( which user is enrolled in which course)
 
-export { courses, modules, assignments, users, enrollments }; // Export courses so other files/componetns can use them.
+import quizzes from "./quizzes.json";
+
+export { courses, modules, assignments, users, enrollments, quizzes };
