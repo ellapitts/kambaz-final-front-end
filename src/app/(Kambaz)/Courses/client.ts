@@ -1,3 +1,22 @@
+/**
+ * ============================================================================
+ * COURSES API CLIENT
+ * ============================================================================
+ * 
+ * Central API client for all course-related operations including:
+ * - Courses (CRUD, enrollment)
+ * - Modules (create, read, update, delete)
+ * - Quizzes (management, questions, attempts)
+ * 
+ * This file acts as the middleman between the frontend (React/Next.js) and 
+ * the backend API (Node.js/Express), organizing all HTTP requests in one place.
+ * 
+ * Base URL: Configured via NEXT_PUBLIC_HTTP_SERVER environment variable
+ * Authentication: Uses axios with credentials for session-based authentification
+ * 
+ * ============================================================================
+ */
+
 import axios from "axios";
 const axiosWithCredentials = axios.create({ withCredentials: true });
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
