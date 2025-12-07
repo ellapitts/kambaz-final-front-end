@@ -6,7 +6,8 @@ export default function Labs() {
   return (
     <div id="wd-labs">
       <h1>Labs - Table of Contents</h1>
-      <h3>Author: Ella Pitts</h3>
+
+      <h3>Author: Ella Pitts and Alara Hakki </h3>
       <h5>CS5610 Web Development - Section 04</h5>
 
       <ul>
@@ -45,28 +46,30 @@ export default function Labs() {
           <Link href="/Account/Signin">Kambaz Application</Link>
         </li>
         <li>
-          <a href="https://github.com/ellapitts/kambaz-next-js" id="wd-github">
-            Ella Pitts GitHub Repository
+          <a href="https://github.com/ellapitts/kambaz-final-front-end" 
+          id="wd-github-client-side">
+            Ella Pitts and Alara Hakki GitHub Repository - Front End
           </a>
         </li>
 
-        {/* Front end */}
+        {/* Backend */}
         <li>
           <a
-            href="https://github.com/ellapitts/kambaz-next-js"
-            id="wd-github-client-side"
-          >
-            Frontend Repository
-          </a>
-        </li>
-
-        {/* backend */}
-        <li>
-          <a
-            href="https://github.com/ellapitts/kambaz-node-server-app"
+            href="https://github.com/ellapitts?tab=repositories"
             id="wd-github-server-side"
           >
             Backend Repository
+          </a>
+        </li>
+
+
+        {/* Mongo */}
+        <li>
+          <a
+            href="https://cloud.mongodb.com/v2/692d3923ef03995c996a7cdf#/explorer/692d3c3b8a52ed5ad1d5d71f/kambaz/users/find"
+            id="wd-github-mongo-db-atlas"
+          >
+            MongoDB Atlas lin
           </a>
         </li>
       </ul>
