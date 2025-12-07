@@ -1,3 +1,4 @@
+// Student view of taking the quiz
 "use client";
 
 export default function TakeQuiz() {

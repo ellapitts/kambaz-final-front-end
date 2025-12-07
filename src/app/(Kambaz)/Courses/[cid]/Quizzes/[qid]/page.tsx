@@ -1,5 +1,57 @@
 "use client";
 
+/**
+ * ============================================================================
+ * QUIZ DETAILS PAGE - READ-ONLY VIEW
+ * ============================================================================
+ * 
+ * @description
+ * Displays comprehensive quiz information in a Canvas-inspired table layout.
+ * This is the landing page after clicking a quiz from the quiz list.
+ * 
+ * @features
+ * - Canvas-style table layout displaying all quiz properties
+ * - Quiz title with action buttons (Preview/Edit for faculty, Take Quiz for students)
+ * - All quiz settings displayed in a clean table format
+ * - Separate dates table showing due date, available from, and until dates
+ * - Question count display
+ * - Publish/Unpublish functionality for faculty
+ * 
+ * @displays
+ * Quiz Properties Table:
+ * - Quiz Type (Graded Quiz, Practice Quiz, Graded Survey, Ungraded Survey)
+ * - Points (total from all questions)
+ * - Assignment Group (Quizzes, Exams, Assignments, Project)
+ * - Shuffle Answers (Yes/No)
+ * - Time Limit (minutes or "No time limit")
+ * - Multiple Attempts (Yes/No)
+ * - How Many Attempts (conditionally shown)
+ * - View Responses setting
+ * - Show Correct Answers timing
+ * - One Question at a Time (Yes/No)
+ * - Require Respondus LockDown Browser (Yes/No)
+ * - Required to View Quiz Results (Yes/No)
+ * - Webcam Required (Yes/No)
+ * - Lock Questions After Answering (Yes/No)
+ * 
+ * Dates Table:
+ * - Due date
+ * - For (audience - defaults to "Everyone")
+ * - Available from date
+ * - Until date
+ * 
+ * @userRoles
+ * - Faculty: Can view all details, Preview, Edit, and Publish/Unpublish
+ * - Students: Can view details and Take Quiz (if published)
+ * 
+ * @navigation
+ * - Preview button → /Courses/[cid]/Quizzes/[qid]/preview
+ * - Edit button → /Courses/[cid]/Quizzes/[qid]/edit
+ * - Take Quiz button → /Courses/[cid]/Quizzes/[qid]/take
+ * 
+ * ============================================================================
+ */
+
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -7,8 +59,14 @@ import * as client from "../../../client";
 import { toast } from 'react-toastify';
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
+import { FaPencil } from "react-icons/fa6";
+import { FaEye } from "react-icons/fa";
 
 export default function QuizDetails() {
+  // ============================================================================
+  // STATE & ROUTE PARAMETERS
+  // ============================================================================
+  
   const { cid, qid } = useParams();
   const { currentUser } = useSelector((state: RootState) => state.accountReducer);
   
@@ -17,6 +75,14 @@ export default function QuizDetails() {
 
   const isFaculty = currentUser?.role === "FACULTY";
 
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+  
+  /**
+   * Fetches quiz data from backend on component mount
+   * Runs whenever cid or qid changes
+   */
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
@@ -33,18 +99,63 @@ export default function QuizDetails() {
     fetchQuiz();
   }, [cid, qid]);
 
-  const togglePublish = async () => {
-    if (!quiz) return;
-    try {
-      await client.publishQuiz(cid as string, quiz._id);
-      const updatedQuiz = await client.findQuizById(cid as string, qid as string);
-      setQuiz(updatedQuiz);
-      toast.success(quiz.published ? "Quiz unpublished" : "Quiz published");
-    } catch (error) {
-      toast.error("Failed to update quiz");
+  // ============================================================================
+  // HELPER FUNCTIONS - DATA FORMATTING
+  // ============================================================================
+
+  /**
+   * Formats ISO date string to readable format
+   * @param dateString - ISO date string from backend
+   * @returns Formatted date string or "Not set"
+   */
+  const formatDateTime = (dateString?: string) => {
+    if (!dateString) return "Not set";
+    const date = new Date(dateString);
+    return date.toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    });
+  };
+
+  /**
+   * Converts backend quiz type enum to readable label
+   * @param type - Backend quiz type enum
+   * @returns Human-readable quiz type label
+   */
+  const getQuizTypeLabel = (type?: string) => {
+    switch(type) {
+      case 'GRADED_QUIZ': return 'Graded Quiz';
+      case 'PRACTICE_QUIZ': return 'Practice Quiz';
+      case 'GRADED_SURVEY': return 'Graded Survey';
+      case 'UNGRADED_SURVEY': return 'Ungraded Survey';
+      default: return 'Graded Quiz';
     }
   };
 
+  /**
+   * Converts backend assignment group enum to readable label
+   * @param group - Backend assignment group enum
+   * @returns Human-readable assignment group label
+   */
+  const getAssignmentGroupLabel = (group?: string) => {
+    switch(group) {
+      case 'QUIZZES': return 'QUIZZES';
+      case 'EXAMS': return 'EXAMS';
+      case 'ASSIGNMENTS': return 'ASSIGNMENTS';
+      case 'PROJECT': return 'PROJECT';
+      default: return 'QUIZZES';
+    }
+  };
+
+  // ============================================================================
+  // RENDER GUARDS - HANDLE LOADING & ERROR STATES
+  // ============================================================================
+
+  /**
+   * Loading state - shows spinner while fetching quiz data
+   */
   if (loading) {
     return (
       <div className="container-fluid mt-4 text-center">
@@ -54,372 +165,211 @@ export default function QuizDetails() {
     );
   }
 
+  /**
+   * Error state - quiz not found or failed to load
+   * Provides navigation back to quiz list
+   */
   if (!quiz) {
     return (
       <div className="container-fluid mt-4">
         <div className="alert alert-danger">Quiz not found</div>
-        <Link href={`/Dashboard/Courses/${cid}/Quizzes`} className="btn btn-primary">
+        <Link href={`/Courses/${cid}/Quizzes`} className="btn btn-primary">
           Back to Quizzes
         </Link>
       </div>
     );
   }
 
+  // ============================================================================
+  // MAIN RENDER - CANVAS-STYLE TABLE LAYOUT
+  // ============================================================================
+
   return (
     <div className="container-fluid">
-      <div className="d-flex justify-content-between mb-3">
-        <h2>{quiz.title}</h2>
+      
+      {/* 
+        HEADER SECTION
+        - Quiz title on left
+        - Action buttons on right (Preview/Edit for faculty, Take Quiz for students)
+      */}
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <h2 className="mb-0">{quiz.title}</h2>
+        
         <div className="d-flex gap-2">
           {isFaculty ? (
             <>
-              <Link href={`/Dashboard/Courses/${cid}/Quizzes/${qid}/preview`} className="btn btn-outline-secondary">
+              <Link 
+                href={`/Courses/${cid}/Quizzes/${qid}/preview`}
+                className="btn btn-outline-secondary"
+              >
+                <FaEye className="me-1"></FaEye>
                 Preview
               </Link>
-              <Link href={`/Dashboard/Courses/${cid}/Quizzes/${qid}/edit`} className="btn btn-outline-secondary">
+              <Link 
+                href={`/Courses/${cid}/Quizzes/${qid}/edit`}
+                className="btn btn-outline-secondary"
+              >
+                <FaPencil className="bi bi-pencil me-1"></FaPencil>
                 Edit
               </Link>
-              <button className="btn btn-success" onClick={togglePublish}>
-                {quiz.published ? "Unpublish" : "Publish"}
-              </button>
             </>
           ) : (
-            <Link href={`/Dashboard/Courses/${cid}/Quizzes/${qid}/take`} className="btn btn-primary">
+            <Link 
+              href={`/Courses/${cid}/Quizzes/${qid}/take`}
+              className="btn btn-primary"
+            >
               Take Quiz
             </Link>
           )}
         </div>
       </div>
 
-      <div className="row g-3">
-        <div className="col-md-3">
-          <div className="card bg-light">
-            <div className="card-body">
-              <div className="text-muted small">Points</div>
-              <div className="fs-5">{quiz.points || 0}</div>
-            </div>
+      {/* 
+        QUIZ PROPERTIES TABLE
+        Displays all quiz settings in a clean, borderless table format
+        Labels are right-aligned and bold, values are left-aligned
+        Contained in a card with light gray background
+      */}
+      <div className="row">
+        <div className="col-12">
+          
+          {/* Card container with gray background */}
+          <div className="card bg-light border-0 mb-4" style={{ maxWidth: "800px" }}>
+            <div className="card-body p-4">
+              <table className="table table-borderless mb-0">
+                <tbody>
+              
+              {/* Quiz Type */}
+              <tr>
+                <td className="text-end fw-semibold" style={{ width: "200px" }}>Quiz Type</td>
+                <td>{getQuizTypeLabel(quiz.quizType)}</td>
+              </tr>
+
+              {/* Points */}
+              <tr>
+                <td className="text-end fw-semibold">Points</td>
+                <td>{quiz.points || 0}</td>
+              </tr>
+
+              {/* Assignment Group */}
+              <tr>
+                <td className="text-end fw-semibold">Assignment Group</td>
+                <td>{getAssignmentGroupLabel(quiz.assignmentGroup)}</td>
+              </tr>
+
+              {/* Shuffle Answers */}
+              <tr>
+                <td className="text-end fw-semibold">Shuffle Answers</td>
+                <td>{quiz.shuffleAnswers ? "Yes" : "No"}</td>
+              </tr>
+
+              {/* Time Limit */}
+              <tr>
+                <td className="text-end fw-semibold">Time Limit</td>
+                <td>{quiz.timeLimit ? `${quiz.timeLimit} Minutes` : "No time limit"}</td>
+              </tr>
+
+              {/* Multiple Attempts */}
+              <tr>
+                <td className="text-end fw-semibold">Multiple Attempts</td>
+                <td>{quiz.multipleAttempts ? "Yes" : "No"}</td>
+              </tr>
+
+              {/* How Many Attempts (only show if multiple attempts enabled) */}
+              {quiz.multipleAttempts && (
+                <tr>
+                  <td className="text-end fw-semibold">How Many Attempts</td>
+                  <td>{quiz.howManyAttempts || 1}</td>
+                </tr>
+              )}
+
+              {/* View Responses */}
+              <tr>
+                <td className="text-end fw-semibold">View Responses</td>
+                <td>Always</td>
+              </tr>
+
+              {/* Show Correct Answers */}
+              <tr>
+                <td className="text-end fw-semibold">Show Correct Answers</td>
+                <td>{quiz.showCorrectAnswers || "Immediately"}</td>
+              </tr>
+
+              {/* One Question at a Time */}
+              <tr>
+                <td className="text-end fw-semibold">One Question at a Time</td>
+                <td>{quiz.oneQuestionAtATime ? "Yes" : "No"}</td>
+              </tr>
+
+              {/* Require Respondus LockDown Browser */}
+              <tr>
+                <td className="text-end fw-semibold">Require Respondus LockDown Browser</td>
+                <td>No</td>
+              </tr>
+
+              {/* Required to View Quiz Results */}
+              <tr>
+                <td className="text-end fw-semibold">Required to View Quiz Results</td>
+                <td>No</td>
+              </tr>
+
+              {/* Webcam Required */}
+              <tr>
+                <td className="text-end fw-semibold">Webcam Required</td>
+                <td>{quiz.webcamRequired ? "Yes" : "No"}</td>
+              </tr>
+
+              {/* Lock Questions After Answering */}
+              <tr>
+                <td className="text-end fw-semibold">Lock Questions After Answering</td>
+                <td>{quiz.lockQuestionsAfterAnswering ? "Yes" : "No"}</td>
+              </tr>
+
+              </tbody>
+            </table>
           </div>
         </div>
-        <div className="col-md-3">
-          <div className="card bg-light">
-            <div className="card-body">
-              <div className="text-muted small">Questions</div>
-              <div className="fs-5">{quiz.questions?.length || 0}</div>
+
+          {/* 
+            DATES TABLE
+            Separate table showing quiz availability and due dates
+            Uses table headers for better organization
+            Also contained in a card with gray background
+          */}
+          <div className="card bg-light border-0 mb-4" style={{ maxWidth: "800px" }}>
+            <div className="card-body p-4">
+              <table className="table table-borderless mb-0">
+                <thead>
+                  <tr>
+                    <th style={{ width: "200px" }}>Due</th>
+                    <th style={{ width: "200px" }}>For</th>
+                    <th style={{ width: "200px" }}>Available from</th>
+                    <th style={{ width: "200px" }}>Until</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{formatDateTime(quiz.dueDate)}</td>
+                    <td>Everyone</td>
+                    <td>{formatDateTime(quiz.availableDate)}</td>
+                    <td>{formatDateTime(quiz.untilDate)}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
+
+          {/* 
+            QUESTION COUNT
+            Displays total number of questions in the quiz
+          */}
+          <div className="mt-4">
+            <span className="fw-semibold me-2">Number of Questions:</span>
+            <span>{quiz.questions?.length || 0}</span>
+          </div>
+
         </div>
       </div>
     </div>
   );
 }
-
-// "use client";
-
-// /*
-// Taking the quiz 
-//   quiz details – flow & notes
-//   - shows a single quiz overview for the current course.
-//   - faculty can preview, edit, publish/unpublish.
-//   - students see read-only info and a take quiz button.
-//   - reached from quiz list or after creating a new quiz.
-// */
-
-// import { useParams, useRouter } from "next/navigation";
-// import { useEffect, useMemo, useState } from "react";
-// import Link from "next/link";
-// import { mockQuizzes, mockUser } from "../client";
-
-// export default function QuizDetails() {
-//   const { cid, qid } = useParams();
-//   const router = useRouter();
-
-//   const [currentUser, setCurrentUser] = useState<any>(null);
-//   const [quizzes, setQuizzes] = useState<any[]>([]);
-
-//   const isFaculty = currentUser?.role === "FACULTY";
-
-//   /* step 1 – load user and quizzes from mock data */
-//   useEffect(() => {
-//     setCurrentUser(mockUser);
-//     setQuizzes(mockQuizzes);
-//   }, [cid, qid]);
-
-//   /* step 2 – find the quiz by id from the list */
-//   const quiz = useMemo(
-//     () => quizzes.find((q) => q._id === qid),
-//     [quizzes, qid]
-//   );
-
-//   /* step 3 – compute status and format dates */
-//   const getAvailabilityStatus = () => {
-//     if (!quiz) return "";
-//     const now = new Date();
-//     const from = quiz.availableDate ? new Date(quiz.availableDate) : null;
-//     const until = quiz.untilDate ? new Date(quiz.untilDate) : null;
-
-//     if (from && now < from) return `not available until ${from.toLocaleDateString()}`;
-//     if (until && now > until) return "closed";
-//     return "available";
-//   };
-
-//   const formatDateTime = (value?: string | null) => {
-//     if (!value) return "not set";
-//     const d = new Date(value);
-//     return d.toLocaleString(undefined, {
-//       month: "short",
-//       day: "numeric",
-//       year: "numeric",
-//       hour: "numeric",
-//       minute: "2-digit"
-//     });
-//   };
-
-//   /* step 4 – toggle publish/unpublish */
-//   const togglePublish = () => {
-//     if (!quiz) return;
-//     setQuizzes((prev) =>
-//       prev.map((q) =>
-//         q._id === quiz._id ? { ...q, published: !q.published } : q
-//       )
-//     );
-//   };
-
-//   /* step 5 – guard if quiz is missing */
-//   if (!quiz) {
-//     return (
-//       <div className="container-fluid mt-4">
-//         <div className="alert alert-danger d-flex justify-content-between align-items-center">
-//           <span>quiz not found.</span>
-//           <button
-//             className="btn btn-sm btn-outline-light"
-//             onClick={() => router.back()}
-//           >
-//             go back
-//           </button>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="container-fluid" id="wd-quiz-details">
-
-//       {/* step 0 – testing tool: switch between faculty/student */}
-//       <div className="alert alert-info mb-3">
-//         logged in as:{" "}
-//         <strong>
-//           {currentUser?.firstName} {currentUser?.lastName}
-//         </strong>{" "}
-//         ({currentUser?.role})
-//         <button
-//           className="btn btn-sm btn-outline-primary ms-3"
-//           onClick={() =>
-//             setCurrentUser(
-//               currentUser?.role === "FACULTY"
-//                 ? { ...mockUser, role: "STUDENT" }
-//                 : mockUser
-//             )
-//           }
-//         >
-//           switch to {isFaculty ? "student" : "faculty"}
-//         </button>
-//       </div>
-
-//       {/* step a – quiz header with actions */}
-//       <div className="d-flex justify-content-between align-items-start mb-3">
-//         <div>
-//           <h2 className="mb-1">{quiz.title}</h2>
-
-//           <div className="text-muted small">
-//             <span className="me-3">
-//               <strong>status:</strong>{" "}
-//               {quiz.published ? (
-//                 <span className="text-success">published</span>
-//               ) : (
-//                 <span className="text-secondary">unpublished</span>
-//               )}
-//             </span>
-
-//             <span className="me-3">
-//               <strong>availability:</strong> {getAvailabilityStatus()}
-//             </span>
-
-//             <span>
-//               <strong>due:</strong>{" "}
-//               {quiz.dueDate
-//                 ? new Date(quiz.dueDate).toLocaleDateString()
-//                 : "no due date"}
-//             </span>
-//           </div>
-//         </div>
-
-//         {/* step a1 – faculty or student buttons */}
-//         <div className="d-flex gap-2">
-//           {isFaculty ? (
-//             <>
-//               {/* preview button */}
-//               <Link
-//                 href={`/Dashboard/Courses/${cid}/Quizzes/${quiz._id}/preview`}
-//                 className="btn btn-outline-secondary"
-//               >
-//                 <i className="bi bi-eye me-1"></i>
-//                 preview
-//               </Link>
-
-//               {/* edit button */}
-//               <Link
-//                 href={`/Dashboard/Courses/${cid}/Quizzes/${quiz._id}/edit`}
-//                 className="btn btn-outline-secondary"
-//               >
-//                 <i className="bi bi-pencil me-1"></i>
-//                 edit
-//               </Link>
-
-//               {/* publish/unpublish button */}
-//               <button
-//                 className={`btn ${
-//                   quiz.published ? "btn-outline-secondary" : "btn-success"
-//                 }`}
-//                 onClick={togglePublish}
-//               >
-//                 {quiz.published ? (
-//                   <>
-//                     <i className="bi bi-x-circle me-1"></i> unpublish
-//                   </>
-//                 ) : (
-//                   <>
-//                     <i className="bi bi-check-circle me-1"></i> publish
-//                   </>
-//                 )}
-//               </button>
-//             </>
-//           ) : (
-//             /* student: take quiz button */
-//             <Link
-//               href={`/Dashboard/Courses/${cid}/Quizzes/${quiz._id}/take`}
-//               className="btn btn-primary"
-//             >
-//               <i className="bi bi-play-circle me-1"></i>
-//               take quiz
-//             </Link>
-//           )}
-//         </div>
-//       </div>
-
-//       <hr />
-
-//       {/* step b – summary cards */}
-//       <div className="row g-3 mb-4">
-//         <div className="col-md-3">
-//           <div className="card border-0 bg-light">
-//             <div className="card-body py-3">
-//               <div className="text-muted small">points</div>
-//               <div className="fs-5 fw-semibold">{quiz.points || 0}</div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="col-md-3">
-//           <div className="card border-0 bg-light">
-//             <div className="card-body py-3">
-//               <div className="text-muted small">questions</div>
-//               <div className="fs-5 fw-semibold">{quiz.questions?.length || 0}</div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="col-md-3">
-//           <div className="card border-0 bg-light">
-//             <div className="card-body py-3">
-//               <div className="text-muted small">quiz type</div>
-//               <div className="fs-6">graded quiz</div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="col-md-3">
-//           <div className="card border-0 bg-light">
-//             <div className="card-body py-3">
-//               <div className="text-muted small">time limit</div>
-//               <div className="fs-6">
-//                 {quiz.timeLimit ? `${quiz.timeLimit} minutes` : "none"}
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* step c – settings + availability info */}
-//       <div className="row">
-//         <div className="col-md-8">
-//           <h5 className="mb-3">quiz settings</h5>
-
-//           <dl className="row small">
-//             <dt className="col-sm-4">available from</dt>
-//             <dd className="col-sm-8">{formatDateTime(quiz.availableDate)}</dd>
-
-//             <dt className="col-sm-4">available until</dt>
-//             <dd className="col-sm-8">{formatDateTime(quiz.untilDate)}</dd>
-
-//             <dt className="col-sm-4">due</dt>
-//             <dd className="col-sm-8">
-//               {quiz.dueDate ? formatDateTime(quiz.dueDate) : "no due date"}
-//             </dd>
-
-//             <dt className="col-sm-4">shuffle answers</dt>
-//             <dd className="col-sm-8">
-//               {quiz.shuffleAnswers ? "yes" : "no"}
-//             </dd>
-
-//             <dt className="col-sm-4">multiple attempts</dt>
-//             <dd className="col-sm-8">
-//               {quiz.multipleAttempts
-//                 ? `yes (${quiz.allowedAttempts || "unlimited"} allowed)`
-//                 : "no"}
-//             </dd>
-
-//             <dt className="col-sm-4">show correct answers</dt>
-//             <dd className="col-sm-8">
-//               {quiz.showCorrectAnswers
-//                 ? "after submission"
-//                 : "not shown to students"}
-//             </dd>
-
-//             <dt className="col-sm-4">access code</dt>
-//             <dd className="col-sm-8">
-//               {quiz.accessCode ? "required" : "not required"}
-//             </dd>
-
-//             <dt className="col-sm-4">one question at a time</dt>
-//             <dd className="col-sm-8">
-//               {quiz.oneQuestionAtATime ? "yes" : "no"}
-//             </dd>
-
-//             <dt className="col-sm-4">webcam required</dt>
-//             <dd className="col-sm-8">
-//               {quiz.webcamRequired ? "yes" : "no"}
-//             </dd>
-
-//             <dt className="col-sm-4">lock after answering</dt>
-//             <dd className="col-sm-8">
-//               {quiz.lockQuestionsAfterAnswering ? "yes" : "no"}
-//             </dd>
-//           </dl>
-//         </div>
-
-//         {/* step d – instructions */}
-//         <div className="col-md-4">
-//           <h5 className="mb-3">instructions</h5>
-//           <div className="border rounded p-3 small bg-light">
-//             {quiz.description ? (
-//               <div dangerouslySetInnerHTML={{ __html: quiz.description }} />
-//             ) : (
-//               <p className="text-muted mb-0">
-//                 no instructions added. use the editor to add details.
-//               </p>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }

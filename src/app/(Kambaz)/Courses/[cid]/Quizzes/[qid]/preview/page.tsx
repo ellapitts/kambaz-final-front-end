@@ -1,3 +1,4 @@
+// Professor preview of the quiz for the student view when TAKING THE QUIZ 
 "use client";
 
 export default function PreviewQuiz() {

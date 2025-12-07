@@ -33,3 +33,4 @@ export const filterQuizzes = (
 
   return isFaculty ? filtered : filtered.filter((q: any) => q.published);
 };
+

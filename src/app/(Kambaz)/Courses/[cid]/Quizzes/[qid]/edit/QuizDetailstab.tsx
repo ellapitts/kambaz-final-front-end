@@ -34,7 +34,7 @@ export default function QuizDetailsTab({
             <input
               type="number"
               className="form-control"
-              value={quiz.points || 0}
+              value={quiz.points || ""}
               onChange={(e) => updateField("points", Number(e.target.value) || 0)}
             />
           </div>
@@ -208,7 +208,7 @@ export default function QuizDetailsTab({
 
       {/* Right column - Description */}
       <div className="col-md-4">
-        <h5 className="mb-3">Instructions</h5>
+        <h5 className="text-wrap align-center mb-3">Quiz Instructions / Quiz Details</h5>
         <textarea
           className="form-control"
           rows={12}
