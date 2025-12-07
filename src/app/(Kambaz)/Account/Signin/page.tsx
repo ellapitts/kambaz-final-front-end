@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
@@ -15,28 +14,6 @@ export default function Signin() {
 
   const [error, setError] = useState("");
 
-  // The function gets called when the button is clicked
-//   const signin = async () => {
-//   console.log("Attempting signin with:", credentials);
-//   try {
-//     const user = await client.signin(credentials);
-//     console.log("Received user from server:", user);
-    
-//     if (!user) {
-//       alert("No user returned");
-//       return;
-//     }
-    
-//     console.log("Dispatching user to redux");
-//     dispatch(setCurrentUser(user));
-    
-//     console.log("Navigating to Dashboard");
-//     window.location.href = "/Dashboard";
-//   } catch (error: any) {
-//     console.error("Signin error:", error);
-//     alert("Signin failed: " + (error?.response?.data?.message || error.message));
-//   }
-// };
   const signin = async () => {
     try {
       const user = await client.signin(credentials);
@@ -45,7 +22,8 @@ export default function Signin() {
         return;
       }
       dispatch(setCurrentUser(user));
-      router.push("/Dashboard");
+      window.location.href = "/Dashboard"; // Reloads full page to ensure cookie's set
+      //router.push("/Dashboard"); // Causes 401 error
     } catch (err: any) {
       console.error("Signin error:", err);
       const message =

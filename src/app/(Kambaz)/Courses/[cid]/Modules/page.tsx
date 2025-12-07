@@ -61,8 +61,6 @@ export default function Modules() {
     dispatch(setModules(newModules));
   };
 
-
-
   return (
     <div className="modules-page">
       <ModulesControls 
