@@ -44,8 +44,8 @@ export default function QuizListItem({
         <Link
           href={
             isFaculty
-              ? `/Dashboard/Courses/${cid}/Quizzes/${quiz._id}`
-              : `/Dashboard/Courses/${cid}/Quizzes/${quiz._id}/take`
+              ? `/Courses/${cid}/Quizzes/${quiz._id}`
+              : `/Courses/${cid}/Quizzes/${quiz._id}/take`
           }
           className="fw-bold text-dark text-decoration-none"
         >
@@ -102,7 +102,7 @@ export default function QuizListItem({
               {/* Edit - Blue button */}
               <Dropdown.Item 
                 as={Link}
-                href={`/Dashboard/Courses/${cid}/Quizzes/${quiz._id}/edit`}
+                href={`/Courses/${cid}/Quizzes/${quiz._id}/edit`}
               >
                 <FaPencilAlt className="me-2 text-primary"></FaPencilAlt>
                   Edit
@@ -126,7 +126,7 @@ export default function QuizListItem({
                {/* Preview  - Purple info*/}
               <Dropdown.Item 
                 as={Link}
-                href={`/Dashboard/Courses/${cid}/Quizzes/${quiz._id}/preview`}
+                href={`/Courses/${cid}/Quizzes/${quiz._id}/preview`}
               >
                 <MdPreview className="bi bi-eye me-2 text-info"></MdPreview>Preview
               </Dropdown.Item>
