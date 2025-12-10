@@ -13,6 +13,7 @@ interface QuizListItemProps {
   quiz: any;
   cid: string;
   isFaculty: boolean;
+  isStudent: boolean;
   onDelete: (quizId: string) => void;
   onTogglePublish: (quiz: any) => void;
   getAvailabilityStatus: (quiz: any) => string;
@@ -22,6 +23,7 @@ export default function QuizListItem({
   quiz,
   cid,
   isFaculty,
+  isStudent;
   onDelete,
   onTogglePublish,
   getAvailabilityStatus
@@ -133,7 +135,35 @@ export default function QuizListItem({
             </Dropdown.Menu>
           </Dropdown>
         </div>
-      )}
-    </li>
-  );
-}
+
+                {/* Metadata: availability, due, points, questions */}
+        <div className="text-muted small mt-1">
+          <span className="me-3">
+            <strong>{getAvailabilityStatus(quiz)}</strong>
+          </span>
+          <span className="me-2">|</span>
+          <span className="me-3">
+            <strong>Due:</strong>{" "}
+            {quiz.dueDate
+              ? new Date(quiz.dueDate).toLocaleDateString()
+              : "No due date"}
+          </span>
+          <span className="me-2">|</span>
+          <span className="me-3">{quiz.points || 0} pts</span>
+          <span className="me-2">|</span>
+          <span>{quiz.questions?.length || 0} Questions</span>
+        </div>
+
+        {/* Student-only: last score and attempts */}
+        {isStudent && (
+          <div className="text-muted small">
+            Score: {quiz.latestScore != null ? quiz.latestScore : "—"}
+            {" · "}
+            Attempts: {quiz.attemptCount ?? 0}
+          </div>
+        )}
+
+              )}
+            </li>
+          );
+        }

@@ -40,6 +40,7 @@ export default function Quizzes() {
   const [isPreviewing, setIsPreviewing] = useState(false);
 
   const isFaculty = currentUser?.role === "FACULTY";
+  const isStudent = currentUser?.role === "STUDENT";
 
   const displayFacultyStudent = isFaculty && !isPreviewing;
 
@@ -173,6 +174,7 @@ export default function Quizzes() {
             quiz={quiz}
             cid={cid as string}
             isFaculty={displayFacultyStudent}
+            isStudent={isStudent}
             onDelete={handleDeleteQuiz}
             onTogglePublish={togglePublish}
             getAvailabilityStatus={getAvailabilityStatus}
