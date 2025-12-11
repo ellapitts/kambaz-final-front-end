@@ -178,7 +178,7 @@ export const deleteQuestion = async (courseId: string, quizId: string, questionI
   return response.data;
 };
 
-// ===== QUIZ ATTEMPTS =====
+// ===== QUIZ ATTEMPTS (STUDENT) =====
 
 // Get all attempts for a quiz
 export const getAllAttempts = async (courseId: string, quizId: string) => {

@@ -69,6 +69,7 @@ export default function MultipleChoiceEditor({
           return (
             <div key={index} className="mb-3 p-3 border rounded bg-light">
               <div className="d-flex align-items-start gap-3">
+                
                 {/* Checkbox to mark correct */}
                 <div className="form-check mt-2">
                   <input
