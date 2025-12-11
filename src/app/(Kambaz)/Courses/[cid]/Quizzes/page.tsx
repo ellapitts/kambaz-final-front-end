@@ -75,7 +75,7 @@ export default function Quizzes() {
       });
       dispatch(setQuizzes([...quizzes, newQuiz]));
       toast.success("Quiz created!");
-      router.push(`/Dashboard/Courses/${cid}/Quizzes/${newQuiz._id}/edit`);
+      router.push(`/Courses/${cid}/Quizzes/${newQuiz._id}/edit`);
     } catch (e) {
       console.error("Failed to create quiz:", e);
         toast.error("Failed to create quiz");
