@@ -1,4 +1,4 @@
-// The + Quiz button with 3-dot menu
+// The + Quiz button with 3-dot menu and search bar for quizzes page
 "use client";
 import { Button, Dropdown } from "react-bootstrap";
 import { FaPlus, FaGlasses, FaChalkboardTeacher } from "react-icons/fa";
@@ -33,6 +33,7 @@ export default function QuizzesControls({
 
   return (
     <div className="d-flex justify-content-between align-items-center mb-4">
+      
       {/* Search bar */}
       <div className="input-group" style={{ maxWidth: "500px" }}>
         <span className="input-group-text">
@@ -107,7 +108,7 @@ export default function QuizzesControls({
               Quiz
             </Button>
 
-            {/* 3-dot menu for quiz controls */}
+            {/* 3-dot menu for quiz controls like to publish, unpublish, search quiz */}
             <Dropdown>
               <Dropdown.Toggle variant="secondary" id="quiz-controls-dropdown">
                 <IoEllipsisVertical className="fs-5" />
@@ -119,6 +120,7 @@ export default function QuizzesControls({
                   Search for Quiz
                 </Dropdown.Item>
 
+                 {/* Sorting options inside */}
                 <Dropdown.Item>
                   <i className="bi bi-arrow-down-up me-2 text-info"></i>
                   Sort by Name
