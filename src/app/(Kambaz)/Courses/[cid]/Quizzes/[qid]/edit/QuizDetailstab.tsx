@@ -1,5 +1,9 @@
 "use client";
-
+/**
+ * QUIZ DETAILS TAB
+ * Form for configuring all quiz settings (title, dates, options, instructions).
+ * Updates flow upward via updateField() and updateCheckbox() callbacks.
+ */
 interface QuizDetailsTabProps {
   quiz: any;
   updateField: (name: string, value: any) => void;

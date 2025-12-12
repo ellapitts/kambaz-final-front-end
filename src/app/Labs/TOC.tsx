@@ -67,13 +67,13 @@ export default function TOC() {
       </NavItem>
 
       <NavItem>
-        <NavLink href="https://github.com/ellapitts/kambaz-next-js">
+        <NavLink href="https://github.com/ellapitts/kambaz-final-front-end">
           Frontend Repository
         </NavLink>
       </NavItem>
 
       <NavItem>
-        <NavLink href="https://github.com/ellapitts/kambaz-node-server-app">
+        <NavLink href="https://github.com/ellapitts/kambaz-final-back-end">
           Server Repository
         </NavLink>
       </NavItem>
