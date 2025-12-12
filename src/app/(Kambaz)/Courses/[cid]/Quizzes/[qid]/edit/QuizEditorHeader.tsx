@@ -5,6 +5,7 @@
  * Modal for creating/editing questions with type-specific editors (MC, T/F, Fill-in-Blank).
  * Handles validation, type switching, and coordinates data flow between parent and child editors.
  */
+
 interface QuizEditorHeaderProps {
   quizTitle: string;
   onCancel: () => void;
