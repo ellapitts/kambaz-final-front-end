@@ -1,5 +1,9 @@
 "use client";
-
+/**
+ * QUIZ EDITOR TABS
+ * Tab navigation for switching between Details and Questions tabs.
+ * Highlights active tab and triggers onTabChange callback when clicked.
+ */
 interface QuizEditorTabsProps {
   activeTab: "details" | "questions";
   onTabChange: (tab: "details" | "questions") => void;
